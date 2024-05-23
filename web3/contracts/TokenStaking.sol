@@ -106,4 +106,113 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         _earlyUnstakeFeePercentage = earlyUnstakeFeePercentage_;
     }
 
+    /* View Method Start */
+
+    /**
+     * @notice This function is used to get the minimum staking amount for program
+     */
+    function getMinimumStakingAmount() external view returns (uint256){
+        return _minimumStakingAmount;
+    }
+
+    /**
+     * @notice This function is used to get the maximum staking amount for program
+     */
+    function getMaxStakingAmount() external view returns (uint256){
+        return _maxStakingAmount;
+    }
+
+    /**
+     * @notice This function is used to get the staking start date for program
+     */
+    function getStakeStartDate() external view returns (uint256){
+        return _stakeStartDate;
+    }
+
+    /**
+     * @notice This function is used to get the staking end date for program
+     */
+    function getStakeEndDate() external view returns (uint256){
+        return _stakeEndDate;
+    }
+
+    /**
+     * @notice This function is used to get the total no of tokens that are staked
+     */
+    function getTotalStakedTokens() external view returns (uint256){
+        return _totalStakedTokens;
+    }
+
+    /**
+     * @notice This function is used to get the total no of users
+     */
+    function getTotalUsers() external view returns (uint256){
+        return _totalUsers;
+    }
+
+    /**
+     * @notice This function is used to get the stake days
+     */
+    function getStakeDays() external view returns (uint256){
+        return _stakeDays;
+    }
+
+    /**
+     * @notice This function is used to get early unstake fee percentage
+     */
+    function getEarlyUnstakeFeePercentage() external view returns (uint256){
+        return _earlyUnstakeFeePercentage;
+    }
+
+    /**
+     * @notice This function is used to get staking status
+     */
+    function getStakingStatus() external view returns (uint256){
+        return _isStakingPaused;
+    }
+
+    /**
+     * @notice This function is used to get the current APY Rate
+     * @return Current APY Rate
+     */
+    function getAPY() external view returns (uint256){
+        return _apyRate;
+    }
+
+    /**
+     * @notice This function is used to get msg.sender's estimated reward amount
+     * @return msg.sender's estimated reward amount
+     */
+    function getUserEstimatedRwards() external view returns (uint256){
+        (uint256 amount, ) = _getUserEstimatedRewards(msg.sender);
+        return _users[msg.sender].rewardAmount + amount;
+    }
+
+    /**
+     * @notice This function is used to get withdrawable amount from contract
+     */
+    function getWithdrawableAmount() external view returns (uint256){
+        return IERC20(_tokenAddress).balanceOf(address(this)) - totalStakedTokens;
+    }
+
+    /**
+     * @notice This function is used to get User's details
+     * @param userAddress User's address to get details of
+     * @return User Struct
+     */
+    function getUser(address userAddress) external view returns (User memory){
+        return _users[userAddress]
+    }
+
+    /**
+     * @notice This function is used to check if a user is a StakeHolder
+     * @param _user Address of the user to check
+     * @return True if user is a stakeholder, false otherwise
+     */
+    function isStakeHolder(address _user) external view returns (bool){
+        return _user[_user].stakeAmount != 0;
+    }
+
+    /* View Methods End*/
+
 }
