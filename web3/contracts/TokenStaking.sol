@@ -215,4 +215,71 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
 
     /* View Methods End*/
 
+    /* Owner Methods Start*/
+
+    /**
+     * @notice This function is used to update minimum Staking amount
+     */
+    function updateMinimumStakingAmount(uint256 newAmount) external onlyOwner {
+        _minimumStakingAmount = newAmount;
+    }
+
+    /**
+     * @notice This function is used to update maximum Staking amount
+     */
+    function updateMaximumStakingAmount(uint256 newAmount) external onlyOwner {
+        _maxStakingAmount = newAmount;
+    }
+
+    /**
+     * @notice This function is used to update staking End date
+     */
+    function updateStakingEndDate(uint256 newDate) external onlyOwner {
+        _stakeEndDate = newDate;
+    }
+
+    /**
+     * @notice This function is used to update early unstake fee percentage
+     */
+    function updateEarlyUnstakeFeePercentage(uint256 newPercentage) external onlyOwner {
+        _earlyUnstakeFeePercentage = newPercentage;
+    }
+
+    /**
+     * @notice stake tokens for specific user
+     * @dev this function can be used to stake tokens for specific user
+     * 
+     * @param amount the amount to stake
+     * @param user user's address
+     */
+    function stakeForUser(uint256 amount, address user) external onlyOwner nonReentrant{
+        _stakeTokens(amount, user);
+    }
+
+    /**
+     * @notice enable/disable staking
+     * @dev this function can be used to toggle staking status
+     */
+    function toggleStakingStatus() external onlyOwner{
+        _isStakingPaused = !_isStakingPaused;
+    }
+
+    /**
+     * @notice Withdraw the specified amount if possible
+     * @dev this function can be used to withdraw the available tokens with this contract to the caller
+     * 
+     * @param amount the amount to withdraw
+     */
+    function withdraw(uint256 amount) external onlyOwner nonReentrant{
+        require(this.getWithdrawableAmount() >= amount, "TokenStaking: not enough withdrawable tokens");
+        IERC20(_tokenAddress).transfer(msg.sender, amount);
+    }
+
+    /* Owner Methods End */
+
+    
+
+
+
+
 }
