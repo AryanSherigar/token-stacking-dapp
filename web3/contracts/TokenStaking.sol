@@ -277,9 +277,139 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
 
     /* Owner Methods End */
 
+    /* User Methods Start */
+
+    /**
+     * @notice This function is used to stake token
+     * @param _amount Amount of token to be staked
+     */
+    function stake(uint256 _amount) external nonReentrant{
+        _stakeTokens(_amount, msg.sender);
+    }
+
+    function _stakeTokens(uint256 _amount, address user_) private {
+        require(!_isStakingPaused, "TokenStaking: staking is paused");
+
+        uint256 currentTime = getCurrentTime();
+        require(currentTime > _stakeStartDate, "TokenStaking: Staking is not started yet");
+        require(currentTime < _stakeEndDate, "TokenStaking: Staking ended");
+        require(_totalStakedTokens + _amount <= _maxStakeTokenLimit, "TokenStaking: max staking token limit reached");
+        require(_amount > 0, "TokenStaking: stake amount should be greater than zero");
+        require(_amount >= _minimumStakingAmount, "TokenStaking: stake amount must be greater than minimum amount allowed");
+
+        if(_user[user_].stakeAmount != 0) {
+            _calculateRewards(user_);
+        } else {
+            _user[user_].lastRewardCalculationTime = currentTime;
+            _totalUsers += 1;
+        }
+
+        _user[user_].stakeAmount += _amount;
+        _user[user_].lastStakeTie = currentTime;
+
+        _totalStakedTokens += _amount;
+
+        require(
+            IERC20(_tokenAddress).transferFrom(msg.sender, address(this), _amount),
+            "TokenStaking: failed to tranfer tokens"
+        );
+        emit Stake(user_, _amount);
+    }
+
+    /**
+     * @notice This function is used to unstake tokens
+     * @param _amount Amount of tokens to be unstaked
+     */
+    function unstake(uint256 _amount) external nonReentrant whenTreasuryHasBalance(_amount){
+        address user = msg.sender;
+
+        require(_amount !=0, "TokenStaking: amount should be non-zero");
+        require(this.isStakeHolder(user), "TokenStaking : not a stakeholder");
+        require(_user[user].stakeAmount >= _amount, "TokenStaking: not enough stkae to unstake");
+
+        //Calculate User's rewards untill now
+        _calculateRewards(user);
+
+        uint256 feeEarlyUnstake;
+
+        if(getCurrentTime() <=_user[user].lastStakeTime + _stakeDays) {
+            feeEarlyUnstake = ((_amount * _earlyUnstakeFeePercentage) / PERCENTAGE_DENOMINATION);
+            emit EarlyUnstakeFee(user, feeEarlyUnstake);
+        }
+
+        uint256 amountToUnstake = _amount - feeEarlyUnstake;
+
+        _user[user].stakeAmount -= _amount;
+
+        _totalStakedTokens -= _amount;
+
+        if(_user[user].stakeAmount == 0){
+            //delete _user[user];
+            _totalUser -= 1;
+        }
+
+        require(IERC20(_tokenAddress).transfer(user, amountToUnstake), "TokenStaking: failed to transfer");
+        emit Unstake(user, _amount);
+    }
+
+    /**
+     * @notice This function is used to claim user's rewards
+     */
+    function claimReward() external whenTreasuryHasBalance(_user[msg.sender].rewardAmount) {
+        _calculateRewards(msg.sender);
+        uint256 rewardAmount = _user[msg.sender].rewardAmount;
+
+        require(rewardAmount > 0, "TokenStaking: no reward to claim");
+
+        require(IERC20(_tokenAddress).transfer(msg.sender, rewardAmount), "TokenStaking: failed to transfer");
+
+        _user[msg.sender].rewardAmount = 0;
+        _user[msg.sender].rewardsClaimedSoFar += rewardAmount;
+
+        emit ClaimReward(msg.sender, rewardAmount);
+    }
+
+    /* User Methods Ends */
+
+    /* Private Helper Methods Start */
+
+    /**
+     * @notice This function is used to calculate rewards for a user
+     * @param _user Address of the user
+     */
+    function _calculateRewards(address _user) private {
+        (uint256 userReward, uint256 currentTime) = _getUserEstimatedRewards(_user);
+
+        _user[_user].rewardAmount += userReward;
+        _user[_user].lastRewardCalculationTime = currentTime;
+    }
+
+    /**
+     * @notice This function is used to get estimated rewards for a user
+     * @param _user Address of the user
+     * @return Estimated rewards for the user
+     */
+    function _getUserEstimatedRewards(address _user) private view returns(uint256, uint256){
+        uint256 userReward;
+        uint256 userTimeStamp = _user[_user].lastRewardCalculationTime;
+
+        uint256 currentTime = getCurrentTime();
+
+        if(currentTime > _user[_user].lastStakeTime + _stakeDays) {
+            currentTime = _user[_user].lastStakeTime + _stakeDays;
+        }
+
+        uint256 totalStakedTime = currentTime -userTimestamp;
+
+        userReward += ((totalStakedTime = _user[_user].stakeAmount + _apyRate) / 365 days) / PERCENTAGE_DENOMINATOR;
+
+        return(userReward, currentTime)
+    }
     
-
-
+    
+    function getCurrentTime() internal view virtual returns (uint256) {
+        return block.timestamp;
+    }
 
 
 }
