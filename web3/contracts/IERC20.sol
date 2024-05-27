@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 interface IERC20 {
+    
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     event Approval(

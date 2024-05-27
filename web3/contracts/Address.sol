@@ -2,18 +2,33 @@
 pragma solidity ^0.8.9;
 
 library Address {
-    //checks if the length of the bytecode of the address is more than zero
-    //.code is used to convert the address datatype to bytecode
+    /**
+    * @dev Determines whether the specified address is a contract.
+    *
+    * This function checks if the `account` address contains bytecode.
+    * An address is considered a contract if the length of its code is greater than 0.
+    *
+    * @param account The address to be checked.
+    * @return bool Returns true if the address is a contract, false otherwise.
+    */
     function isContract(address account) internal view returns (bool) {
-        return address.code.length > 0;
+        return account.code.length > 0;
     }
 
-    function sendValue(address payable recipent, uint256 amount) internal {
+    /**
+    * @dev Transfers a specified amount of Ether to a given payable address.
+    * Reverts if the contract's balance is insufficient or if the transfer fails.
+    *
+    * @param recipient The address to which the Ether will be sent.
+    * @param amount The amount of Ether (in wei) to send.
+    */
+    function sendValue(address payable recipient, uint256 amount) internal {
         require(address(this).balance >= amount, "Insufficient Fund");
 
-        (bool success, ) = recipent.call{value: amount}("");
+        (bool success, ) = recipient.call{value: amount}("");
         require(success, "unable to make transaction, transaction reverted");
     }
+
 
     // This is a common utility function to call a contract through low level in solidity
     // This function down here does not contain the entire implementation
@@ -48,7 +63,7 @@ library Address {
         string memory errorMessage
     )internal returns (bytes memory){
         require(address(this).balance>=value, "Insufficient Balance");
-        require(isContract(target),"Address call to non contract");
+        require(isContract(target), "Address call to non contract");
 
         (bool success, bytes memory returndata) = target.call{value:value}(data);
         return verifyCallResult(success, returndata, errorMessage);
