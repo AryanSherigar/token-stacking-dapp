@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-
+/**
+ * @title MyToken
+ * @dev A basic ERC20 token contract implementation.
+ */
 contract MyToken {
     string public name = "MyToken";
     string public symbol = "MTK";
-    string public standard ="MyToken v0.1";
+    string public standard = "MyToken v0.1";
     uint256 public totalSupply;
     address public ownerOfContract;
     uint256 public _userId;
 
-    uint256 constant intialSupply = 1000000 * (10**18);
+    uint256 constant initialSupply = 1000000 * (10**18);
 
     address[] public holderToken;
 
     event Transfer(address indexed _from, address indexed_to, uint256 _value);
-
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
     mapping (address => TokenHolderInfo) public tokenHolderInfos;
@@ -31,26 +33,33 @@ contract MyToken {
     mapping (address => uint256) public balanceOf;
     mapping (address => mapping (address => uint256)) public allowance;
 
-    constructor(){
-        ownerOfContract = msg.sender();
-        balanceOf[msg.sender] = intialSupply;
-        totalSupply = intialSupply;
+    /**
+     * @dev Constructor to initialize the token contract.
+     */
+    constructor() {
+        ownerOfContract = msg.sender;
+        balanceOf[msg.sender] = initialSupply;
+        totalSupply = initialSupply;
     }
 
+    /**
+     * @dev Internal function to increment user ID.
+     */
     function inc() internal {
         _userId++;
     }
 
-    function transfer(address _to, uint256 _value) public returns(bool success){
-
-        require(balanceOf[msg.sender] >=_value);
+    /**
+     * @dev Transfer tokens from sender to a specified recipient.
+     */
+    function transfer(address _to, uint256 _value) public returns(bool success) {
+        require(balanceOf[msg.sender] >= _value);
         inc();
 
-        balanceOf[msg.sender] -=value;
-        balanceOf[_to] +=value;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
 
         TokenHolderInfo storage tokenHolderInfo = tokenHolderInfos[_to];
-
         tokenHolderInfo._to = _to;
         tokenHolderInfo._from = msg.sender;
         tokenHolderInfo._totalToken = _value;
@@ -62,54 +71,50 @@ contract MyToken {
         emit Transfer(msg.sender, _to, _value);
         
         return true;
-
     }
 
-    function approve(address _spender, uint256 _value) public returns (bool success){
-
+    /**
+     * @dev Approve the spender to spend a specified amount of tokens on behalf of the sender.
+     */
+    function approve(address _spender, uint256 _value) public returns (bool success) {
         allowance[msg.sender][_spender] = _value;
-        
         emit Approval(msg.sender, _spender, _value);
-
         return true;
     }
 
-    function transferFrom {
-        address _from, address_to, uint256 _value
-    } public returns (bool success){
-
+    /**
+     * @dev Transfer tokens from a specified sender to a specified recipient on behalf of the sender.
+     */
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
         require(_value <= balanceOf[_from]);
         require(_value <= allowance[_from][msg.sender]);
 
-        balanceOf[_from] -= value;
-        balanceOf[_to] += value;
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
 
         allowance[_from][msg.sender] -= _value;
 
         emit Transfer(_from, _to, _value);
-
         return true;
     }
 
-    function getTokenHolderData(address _address) public view returns( 
-        uint256,
-        address,
-        address,
-        uint256,
-        bool
-    ){
-        return(
-            tokenHolderInfos[_address].tokenId,
-            tokenHolderInfos[_address]._to;
-            tokenHolderInfos[_address]._from;
-            tokenHolderInfos[_address]._totalToken;
+    /**
+     * @dev Retrieve token holder data for a specified address.
+     */
+    function getTokenHolderData(address _address) public view returns(uint256, address, address, uint256, bool) {
+        return (
+            tokenHolderInfos[_address]._tokenId,
+            tokenHolderInfos[_address]._to,
+            tokenHolderInfos[_address]._from,
+            tokenHolderInfos[_address]._totalToken,
             tokenHolderInfos[_address]._tokenHolder
         );
     }
 
-    function getTokenHolder() public view returns (address[] memory){
+    /**
+     * @dev Retrieve all token holders.
+     */
+    function getTokenHolder() public view returns (address[] memory) {
         return holderToken;
     }
-
-
 }
