@@ -9,7 +9,7 @@ import "./IERC20.sol";
 contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
 
     struct User{
-        uint256 stakeAmount;
+        uint256 stakeAmount; 
         uint256 rewardAmount;
         uint256 lastStakeTime;
         uint256 lastRewardCalculationTime;
@@ -23,6 +23,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
     uint256 _stakeEndDate;
 
     uint256 _stakeStartDate;
+
     uint256 _totalStakedTokens;
 
     uint256 _totalUsers;
@@ -55,7 +56,20 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         _;
     }
 
-    function intialize(
+    /**
+    * @dev Initializes the staking contract with the given parameters.
+    * 
+    * @param owner_ The owner of the contract.
+    * @param tokenAddress_ The address of the token to be staked.
+    * @param apyRate_ The annual percentage yield rate.
+    * @param minimumStakingAmount_ The minimum amount required to stake.
+    * @param maxStakeTokenLimit_ The maximum amount of tokens that can be staked.
+    * @param stakeStartDate_ The start date for staking.
+    * @param stakeEndDate_ The end date for staking.
+    * @param stakeDays_ The number of days tokens must be staked.
+    * @param earlyUnstakeFeePercentage_ The fee percentage for early unstaking.
+    */
+    function initialize(
         address owner_,
         address tokenAddress_,
         uint256 apyRate_,
@@ -65,16 +79,16 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         uint256 stakeEndDate_,
         uint256 stakeDays_,
         uint256 earlyUnstakeFeePercentage_
-    ) public virtual intializer {
+    ) public virtual initializer {
         _TokenStakin_init_unchained(
             owner_,
             tokenAddress_,
             apyRate_,
             minimumStakingAmount_,
             maxStakeTokenLimit_,
-            stakeStartDate,
-            stakeEndDate,
-            stakeDays,
+            stakeStartDate_,
+            stakeEndDate_,
+            stakeDays_,
             earlyUnstakeFeePercentage_
         );
     }
@@ -90,8 +104,8 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         uint256 stakeDays_,
         uint256 earlyUnstakeFeePercentage_
     ) internal onlyInitializing {
-        require(_apyRate <=10000, "TokenStaking: apy rate should be less than 10000");
-        require(stakeDays_ >0, "TokenStaking: stake days must be non-zero");
+        require(_apyRate <= 10000, "TokenStaking: apy rate should be less than 10000");
+        require(stakeDays_ > 0, "TokenStaking: stake days must be non-zero");
         require(tokenAddress_ != address(0), "TokenStaking: token address cannot be 0 address");
         require(stakeStartDate_ < stakeEndDate_, "TokenStaking: start date must be less than the end date");
 
@@ -183,7 +197,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
      * @notice This function is used to get msg.sender's estimated reward amount
      * @return msg.sender's estimated reward amount
      */
-    function getUserEstimatedRwards() external view returns (uint256){
+    function getUserEstimatedRewards() external view returns (uint256){
         (uint256 amount, ) = _getUserEstimatedRewards(msg.sender);
         return _users[msg.sender].rewardAmount + amount;
     }
@@ -287,6 +301,11 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         _stakeTokens(_amount, msg.sender);
     }
 
+    /**
+     * @notice 
+     * @param _amount
+     * @param user_
+     */
     function _stakeTokens(uint256 _amount, address user_) private {
         require(!_isStakingPaused, "TokenStaking: staking is paused");
 
@@ -374,8 +393,8 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
     /* Private Helper Methods Start */
 
     /**
-     * @notice This function is used to calculate rewards for a user
-     * @param _user Address of the user
+     * @notice This function is used to calculate rewards for a user.
+     * @param _user Address of the user.
      */
     function _calculateRewards(address _user) private {
         (uint256 userReward, uint256 currentTime) = _getUserEstimatedRewards(_user);
@@ -385,9 +404,9 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
     }
 
     /**
-     * @notice This function is used to get estimated rewards for a user
-     * @param _user Address of the user
-     * @return Estimated rewards for the user
+     * @notice This function is used to get estimated rewards for a user.
+     * @param _user Address of the user.
+     * @return Estimated rewards for the user.
      */
     function _getUserEstimatedRewards(address _user) private view returns(uint256, uint256){
         uint256 userReward;
@@ -406,7 +425,10 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         return(userReward, currentTime)
     }
     
-    
+    /**
+     * @notice This function is used to get the current time.
+     * @return Returns a the timestamp of the block.
+     */
     function getCurrentTime() internal view virtual returns (uint256) {
         return block.timestamp;
     }
