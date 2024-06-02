@@ -109,7 +109,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         require(tokenAddress_ != address(0), "TokenStaking: token address cannot be 0 address");
         require(stakeStartDate_ < stakeEndDate_, "TokenStaking: start date must be less than the end date");
 
-        _transferOwnership(owner);
+        _transferOwnership(owner_);
         _tokenAddress = tokenAddress_;
         _apyRate =apyRate_;
         _minimumStakingAmount = minimumStakingAmount_;
@@ -133,7 +133,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
      * @notice This function is used to get the maximum staking amount for program
      */
     function getMaxStakingAmount() external view returns (uint256){
-        return _maxStakingAmount;
+        return _maxStakeTokenLimit;
     }
 
     /**
@@ -181,7 +181,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
     /**
      * @notice This function is used to get staking status
      */
-    function getStakingStatus() external view returns (uint256){
+    function getStakingStatus() external view returns (bool){
         return _isStakingPaused;
     }
 
@@ -206,7 +206,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
      * @notice This function is used to get withdrawable amount from contract
      */
     function getWithdrawableAmount() external view returns (uint256){
-        return IERC20(_tokenAddress).balanceOf(address(this)) - totalStakedTokens;
+        return IERC20(_tokenAddress).balanceOf(address(this)) - _totalStakedTokens;
     }
 
     /**
@@ -215,7 +215,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
      * @return User Struct
      */
     function getUser(address userAddress) external view returns (User memory){
-        return _users[userAddress]
+        return _users[userAddress];
     }
 
     /**
@@ -224,7 +224,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
      * @return True if user is a stakeholder, false otherwise
      */
     function isStakeHolder(address _user) external view returns (bool){
-        return _user[_user].stakeAmount != 0;
+        return _users[_user].stakeAmount != 0;
     }
 
     /* View Methods End*/
@@ -242,7 +242,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
      * @notice This function is used to update maximum Staking amount
      */
     function updateMaximumStakingAmount(uint256 newAmount) external onlyOwner {
-        _maxStakingAmount = newAmount;
+        _maxStakeTokenLimit = newAmount;
     }
 
     /**
@@ -301,11 +301,6 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         _stakeTokens(_amount, msg.sender);
     }
 
-    /**
-     * @notice 
-     * @param _amount
-     * @param user_
-     */
     function _stakeTokens(uint256 _amount, address user_) private {
         require(!_isStakingPaused, "TokenStaking: staking is paused");
 
@@ -316,15 +311,15 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         require(_amount > 0, "TokenStaking: stake amount should be greater than zero");
         require(_amount >= _minimumStakingAmount, "TokenStaking: stake amount must be greater than minimum amount allowed");
 
-        if(_user[user_].stakeAmount != 0) {
+        if(_users[user_].stakeAmount != 0) {
             _calculateRewards(user_);
         } else {
-            _user[user_].lastRewardCalculationTime = currentTime;
+            _users[user_].lastRewardCalculationTime = currentTime;
             _totalUsers += 1;
         }
 
-        _user[user_].stakeAmount += _amount;
-        _user[user_].lastStakeTie = currentTime;
+        _users[user_].stakeAmount += _amount;
+        _users[user_].lastStakeTime = currentTime;
 
         _totalStakedTokens += _amount;
 
@@ -344,46 +339,46 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
 
         require(_amount !=0, "TokenStaking: amount should be non-zero");
         require(this.isStakeHolder(user), "TokenStaking : not a stakeholder");
-        require(_user[user].stakeAmount >= _amount, "TokenStaking: not enough stkae to unstake");
+        require(_users[user].stakeAmount >= _amount, "TokenStaking: not enough stkae to unstake");
 
         //Calculate User's rewards untill now
         _calculateRewards(user);
 
         uint256 feeEarlyUnstake;
 
-        if(getCurrentTime() <=_user[user].lastStakeTime + _stakeDays) {
-            feeEarlyUnstake = ((_amount * _earlyUnstakeFeePercentage) / PERCENTAGE_DENOMINATION);
+        if(getCurrentTime() <=_users[user].lastStakeTime + _stakeDays) {
+            feeEarlyUnstake = ((_amount * _earlyUnstakeFeePercentage) / PERCENTAGE_DENOMINATOR);
             emit EarlyUnstakeFee(user, feeEarlyUnstake);
         }
 
         uint256 amountToUnstake = _amount - feeEarlyUnstake;
 
-        _user[user].stakeAmount -= _amount;
+        _users[user].stakeAmount -= _amount;
 
         _totalStakedTokens -= _amount;
 
-        if(_user[user].stakeAmount == 0){
-            //delete _user[user];
-            _totalUser -= 1;
+        if(_users[user].stakeAmount == 0){
+            //delete _users[user];
+            _totalUsers -= 1;
         }
 
         require(IERC20(_tokenAddress).transfer(user, amountToUnstake), "TokenStaking: failed to transfer");
-        emit Unstake(user, _amount);
+        emit UnStake(user, _amount);
     }
 
     /**
      * @notice This function is used to claim user's rewards
      */
-    function claimReward() external whenTreasuryHasBalance(_user[msg.sender].rewardAmount) {
+    function claimReward() external whenTreasuryHasBalance(_users[msg.sender].rewardAmount) {
         _calculateRewards(msg.sender);
-        uint256 rewardAmount = _user[msg.sender].rewardAmount;
+        uint256 rewardAmount = _users[msg.sender].rewardAmount;
 
         require(rewardAmount > 0, "TokenStaking: no reward to claim");
 
         require(IERC20(_tokenAddress).transfer(msg.sender, rewardAmount), "TokenStaking: failed to transfer");
 
-        _user[msg.sender].rewardAmount = 0;
-        _user[msg.sender].rewardsClaimedSoFar += rewardAmount;
+        _users[msg.sender].rewardAmount = 0;
+        _users[msg.sender].rewardsClaimedSoFar += rewardAmount;
 
         emit ClaimReward(msg.sender, rewardAmount);
     }
@@ -399,8 +394,8 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
     function _calculateRewards(address _user) private {
         (uint256 userReward, uint256 currentTime) = _getUserEstimatedRewards(_user);
 
-        _user[_user].rewardAmount += userReward;
-        _user[_user].lastRewardCalculationTime = currentTime;
+        _users[_user].rewardAmount += userReward;
+        _users[_user].lastRewardCalculationTime = currentTime;
     }
 
     /**
@@ -410,19 +405,19 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
      */
     function _getUserEstimatedRewards(address _user) private view returns(uint256, uint256){
         uint256 userReward;
-        uint256 userTimeStamp = _user[_user].lastRewardCalculationTime;
+        uint256 userTimeStamp = _users[_user].lastRewardCalculationTime;
 
         uint256 currentTime = getCurrentTime();
 
-        if(currentTime > _user[_user].lastStakeTime + _stakeDays) {
-            currentTime = _user[_user].lastStakeTime + _stakeDays;
+        if(currentTime > _users[_user].lastStakeTime + _stakeDays) {
+            currentTime = _users[_user].lastStakeTime + _stakeDays;
         }
 
-        uint256 totalStakedTime = currentTime -userTimestamp;
+        uint256 totalStakedTime = currentTime - userTimeStamp;
 
-        userReward += ((totalStakedTime = _user[_user].stakeAmount + _apyRate) / 365 days) / PERCENTAGE_DENOMINATOR;
+        userReward += ((totalStakedTime = _users[_user].stakeAmount + _apyRate) / 365 days) / PERCENTAGE_DENOMINATOR;
 
-        return(userReward, currentTime)
+        return(userReward, currentTime);
     }
     
     /**

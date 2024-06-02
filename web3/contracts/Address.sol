@@ -45,7 +45,7 @@ library Address {
         bytes memory data,
         string memory errorMessage
     ) internal returns (bytes memory){
-        return functionCallWithValue(target, data, 0, errorMessage)
+        return functionCallWithValue(target, data, 0, errorMessage);
     }
 
     function functionCallWithValue(
@@ -82,11 +82,11 @@ library Address {
         return verifyCallResult(success, returndata, errorMessage);
     }
 
-    function functionDelegateCall(address target, bytes memory data) internal view returns(bytes memory){
+    function functionDelegateCall(address target, bytes memory data) internal returns(bytes memory){
         return functionDelegateCall(target, data, "Address : Low-level delegate-call failed");
     }
 
-    function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal view returns(bytes memory){
+    function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal returns(bytes memory){
         require(isContract(target), "Address: Delegate call to non contract");
 
         (bool success, bytes memory returndata) = target.delegatecall(data);
