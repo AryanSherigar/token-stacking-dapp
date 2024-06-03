@@ -1,7 +1,7 @@
 //FUNCTION CALL
-loadInitialData("sevenDays");
+loadIntialData("sevenDays");
 connectMe("metamask_wallet");
-function connectWallet() {}
+function connectWallet() { }
 
 function openTab(event, name) {
     console.log(name);
@@ -21,13 +21,13 @@ async function loadIntialData(sClass) {
         );
 
         //ID ELEMENT DATA
-        let totalUser = await cObj.methods.getTotalUsers().call();
+        let totalUsers = await cObj.methods.getTotalUsers().call();
         let cApy = await cObj.methods.getAPY().call();
         //GET USER
         let userDetail = await cObj.methods.getUser(currentAddress).call();
 
         const user = {
-            lastRewardCalculationTime : userDetail.lastRewardCalculationime,
+            lastRewardCalculationTime: userDetail.lastRewardCalculationime,
             lastStakeTime: userDetail.lastStakeTime,
             rewardAmount: userDetail.rewardAmount,
             rewardsClaimedSoFar: userDetail.rewardsClaimedSoFar,
@@ -55,9 +55,9 @@ async function loadIntialData(sClass) {
             .call();
 
         //ELEMENTS --CLASS
-        document.getElementById("apy-value-feature").innerHTML = `${
-            totalLockedTokens / 10 ** 18
-        } ${SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol}`;
+
+        document.getElementById("total-locked-tokens-value").innerHTML = `${totalLockedTokens / 10 ** 18
+            } ${SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol}`;
 
         document
             .querySelectorAll(".early-unstake-fee-value")
@@ -69,12 +69,11 @@ async function loadIntialData(sClass) {
         minStakeAmount = Number(minStakeAmount);
         let minA;
 
-        if(minStakeAmount) {
-            minA = `${(minStakeAmount / 10 ** 18).toLocaleString()} ${
-                SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol
-            }`;
+        if (minStakeAmount) {
+            minA = `${(minStakeAmount / 10 ** 18).toLocaleString()} ${SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol
+                }`;
         } else {
-            minA= "N/A";
+            minA = "N/A";
         }
 
         document
@@ -85,11 +84,10 @@ async function loadIntialData(sClass) {
         document
             .querySelectorAll(".Maximum-Staking-Amount")
             .forEach(function (element) {
-                element.innerHTML = `${(10000000).toLocaleString()} ${
-                    SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol
-                }`;
+                element.innerHTML = `${(10000000).toLocaleString()} ${SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol
+                    }`;
             });
-        
+
         let isStakingPaused = await cObj.methods.getStakingStatus().call();
         let isStakingPausedText;
 
@@ -101,7 +99,7 @@ async function loadIntialData(sClass) {
 
         let stakeDays = await cObj.methods.getStakeDays().call();
 
-        let days = Math.floor(Number(stakeDays) / (3600 *24));
+        let days = Math.floor(Number(stakeDays) / (3600 * 24));
 
         let dayDisplay = days > 0 ? days + (days == 1 ? " days, " : " days, ") : "";
 
@@ -113,16 +111,15 @@ async function loadIntialData(sClass) {
             .getUserEstimatedRewards()
             .call({ from: currentAddress });
 
-        document.getElementById("user-reward-balance-value").value = `Reward: ${
-            rewardBal / 10 ** 18
-        } ${SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol}`;
+        document.getElementById("user-reward-balance-value").value = `Reward: ${rewardBal / 10 ** 18
+            } ${SELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol}`;
 
         //USER TOKEN BALANCE
         let balMainUser = currentAddress
             ? await oContractToken.methods.balanceOf(currentAddress).call()
-            :"";
+            : "";
 
-        balMainUser = Number(balMinUser) / 10 ** 18;
+        balMainUser = Number(balMainUser) / 10 ** 18;
 
         document.getElementById(
             "user-token-balance"
@@ -147,7 +144,7 @@ async function loadIntialData(sClass) {
             });
 
         if (currentDate > startDate && currentDate < endDate) {
-            const ele = document.getElementById("countdown-time-value"); 
+            const ele = document.getElementById("countdown-time-value");
             generateCountDown(ele, endDate);
 
             document.getElementById(
@@ -155,7 +152,7 @@ async function loadIntialData(sClass) {
             ).innerHTML = `Staking Ends In`;
         }
 
-        if(currentDate < startDate) {
+        if (currentDate < startDate) {
             const ele = document.getElementById("countdown-time-value");
             generateCountDown(ele, endDate);
 
@@ -211,16 +208,17 @@ function generateCountDown(ele, claimDate) {
 
 async function connectMe(_provider) {
     try {
-        let_comm_res = await commonProviderDetector(_provider);
+        console.log(_provider);
+        let _comm_res = await commonProviderDetector(_provider);
         console.log(_comm_res);
-        if (!_comn_res) {
+        if (!_comm_res) {
             console.log("Please Connect");
         } else {
             let sClass = getSelectedTab();
             console.log(sClass);
         }
     } catch (error) {
-        notyf.error(error.message);
+        notyf.error(` test ${error.message}`);
     }
 }
 
@@ -390,15 +388,15 @@ async function stackTokenMain(_amount_wei, sClass) {
         });
 }
 
-async function unstakeTokens(){
+async function unstakeTokens() {
     try {
         let nTokens = document.getElementById("amount-o-unstack-value").value;
 
-        if(!nTokens) {
+        if (!nTokens) {
             return;
         }
 
-        if(isNaN(nTokens) || nTokens == 0 || Number(nTokens) < 0) {
+        if (isNaN(nTokens) || nTokens == 0 || Number(nTokens) < 0) {
             notyf.error(`Invalid token amount!`);
             return;
         }
@@ -471,7 +469,7 @@ async function unstackTokenMain(_amount_wei, oContractStacking, sClass) {
             let transactionHistory = [];
 
             const allUserTransaction = localStorage.getItem("transaction");
-            if(allUserTransaction) {
+            if (allUserTransaction) {
                 transactionHistory = JSON.parse(localStorage.getItem("transactions"));
                 transactionHistory.push(receiptObj);
                 localStorage.setItem(
