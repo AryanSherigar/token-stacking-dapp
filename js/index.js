@@ -161,7 +161,7 @@ async function loadIntialData(sClass) {
             ).innerHTML = `Staking Starts In`
         }
 
-        document.querySelectorAll(".apy-value").forEach(function (element) {
+        document.querySelectorAll("apy-value").forEach(function (element) {
             element.innerHTML = `${cApy} %`;
         });
     } catch (error) {
@@ -283,7 +283,7 @@ async function approveTokenSpend(_mint_fee_wei, sClass) {
         gasEstimation = await oContractToken.methods
             .approve(
                 SELECT_CONTRACT[_NETWORK_ID].STACKING[sClass].address,
-                _min_fee_wei
+                _mint_fee_wei
             )
             .estimateGas({
                 from: currentAddress,

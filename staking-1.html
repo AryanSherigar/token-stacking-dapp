@@ -257,7 +257,9 @@
                           </ul>
                         </div>
                         <div class="info-right d-flex flex-column">
-                          <span class="apy-value">0%</span>
+                          <span class="apy-value">
+                            <span id="apy-value-feature">0%</span>
+                          </span>
                           <span>APY*</span>
                         </div>
                       </div>
@@ -306,7 +308,9 @@
                           </ul>
                         </div>
                         <div class="info-right d-flex flex-column">
-                          <span class="apy-value">0%</span>
+                          <span class="apy-value">
+                            <span id="apy-value-feature">0%</span>
+                          </span>
                           <span>APY*</span>
                         </div>
                       </div>
@@ -355,7 +359,9 @@
                           </ul>
                         </div>
                         <div class="info-right d-flex flex-column">
-                          <span class="apy-value">0%</span>
+                          <span class="apy-value">
+                            <span id="apy-value-feature">0%</span>
+                          </span>
                           <span>APY*</span>
                         </div>
                       </div>
@@ -404,7 +410,9 @@
                           </ul>
                         </div>
                         <div class="info-right d-flex flex-column">
-                          <span class="apy-value">0%</span>
+                          <span class="apy-value">
+                            <span id="apy-value-feature">0%</span>
+                          </span>
                           <span>APY*</span>
                         </div>
                       </div>
@@ -443,7 +451,7 @@
                       />
                       <a>Max</a>
                     </div>
-                    <span class="btn input-btn mt-2 mt-md-0 ml-md-3" onclick="unstackTokens()">Withdraw</span>
+                    <span class="btn input-btn mt-2 mt-md-0 ml-md-3" onclick="unstakeTokens()">Withdraw</span>
                   </div>
 
                   <div
@@ -457,7 +465,7 @@
                       />
                       <a>Max</a>
                     </div>
-                    <span class="btn input-btn mt-2 mt-md-0 ml-md-3" onclick="claimTokens()">Reward</span>
+                    <span class="btn input-btn mt-2 mt-md-0 ml-md-3" onclick="claimToken()">Reward</span>
                   </div>
                   
                 </div>
@@ -485,10 +493,10 @@
                   <h3 id="total-locked-user-token" class="m-0">1000 TBD</h3>
                   <p>Your Lock Token</p>
                 </div><div class="card no-hover staking-card my-4">
-                  <h3 id="apy-value-feature" class="m-0">20%</h3>
-                  <p>APY</p>
+                  <h3 id="num-of-stackers-value" class="m-0">0</h3>
+                  <p>No of Stakers</p>
                 </div><div class="card no-hover staking-card my-4">
-                  <h3 id="num-of-stackers-value" class="m-0">31h: 23m: 32s</h3>
+                  <h3 id="countdown-time-value" class="m-0">31h: 23m: 32s</h3>
                   <span id="countdown-title-value"></span>
                   <p>Time Left</p>
                 </div>
