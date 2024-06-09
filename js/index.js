@@ -375,7 +375,7 @@ async function stackTokenMain(_amount_wei, sClass) {
             }
 
             console.log(allUserTransaction);
-            window.location.href = window.location.origin + "/analytic.html";
+            window.location.href = window.location.origin + "/staking-1.html";
         })
         .on("transactionHash", (hash) => {
             console.log("Transaction Hash: ", hash);
