@@ -375,7 +375,7 @@ async function stackTokenMain(_amount_wei, sClass) {
             }
 
             console.log(allUserTransaction);
-            window.location.href = "http://127.0.0.1:5500/analytic.html";
+            window.location.href = window.location.origin + "/analytic.html";
         })
         .on("transactionHash", (hash) => {
             console.log("Transaction Hash: ", hash);
@@ -387,10 +387,11 @@ async function stackTokenMain(_amount_wei, sClass) {
             return;
         });
 }
-
+const notification = null;
 async function unstakeTokens() {
     try {
-        let nTokens = document.getElementById("amount-o-unstack-value").value;
+
+        let nTokens = document.getElementById("amount-to-unstack-value").value;
 
         if (!nTokens) {
             return;
@@ -484,7 +485,7 @@ async function unstackTokenMain(_amount_wei, oContractStacking, sClass) {
                 );
             }
 
-            window.location.href = "http://127.0.0.1:5500/analytic.html";
+            window.location.href = window.location.origin + "/analytic.html";
         })
         .on("transactionHash", (hash) => {
             console.log("Transaction Hash: ", hash);
@@ -576,7 +577,7 @@ async function claimTokenMain(oContractStacking, sClass) {
                     JSON.stringify(transactionHistory)
                 );
             }
-            window.location.href = "https://127.0.0.1:5500/analytic.html";
+            window.location.href = window.location.origin + "/analytic.html";
         })
         .on("transactionHash", (hash) => {
             console.log("Transaction Hash: ", hash);
